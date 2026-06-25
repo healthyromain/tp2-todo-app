@@ -1,10 +1,14 @@
+import type { TaskItemData } from "@/lib/types";
 import { useCallback, useEffect, type FC } from "react";
-import { Text, View, StyleSheet, Pressable } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import Animated, {
+    Easing,
+    useAnimatedStyle,
+    useSharedValue,
+    withTiming,
+} from "react-native-reanimated";
 import { Checkbox } from "./checkbox";
 import { TodoTitle } from "./task-title";
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
-import * as Haptics from 'expo-haptics';
-import type { TaskItemData } from "@/lib/types";
 
 type Props = {
   task: TaskItemData;
@@ -13,31 +17,34 @@ type Props = {
   disabled?: boolean;
 };
 
-export const TaskItem: FC<Props> = function ({ task, onLongPress, onChange, disabled = false }) {
+export const TaskItem: FC<Props> = function ({
+  task,
+  onLongPress,
+  onChange,
+  disabled = false,
+}) {
   const completed = task.completed;
 
   const pressed = useSharedValue<boolean>(false);
   const animatedStyles = useAnimatedStyle(() => ({
     opacity: withTiming(pressed.value ? 0.6 : 1, {
-      easing: Easing.inOut(Easing.quad)
+      easing: Easing.inOut(Easing.quad),
     }),
     transform: [
       {
         scale: withTiming(pressed.value ? 0.95 : 1, {
           duration: 500,
-          easing: Easing.inOut(Easing.quad)
+          easing: Easing.inOut(Easing.quad),
         }),
-      }
-    ]
+      },
+    ],
   }));
 
   const handlePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onChange?.(!completed);
   };
 
   const handleLongPress = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     pressed.set(false);
     onLongPress?.();
   }, []);
@@ -46,14 +53,14 @@ export const TaskItem: FC<Props> = function ({ task, onLongPress, onChange, disa
   useEffect(() => {
     opacity.value = withTiming(completed ? 0.5 : 1, {
       duration: 200,
-      easing: Easing.inOut(Easing.bounce)
+      easing: Easing.inOut(Easing.bounce),
     });
   }, [completed]);
 
   const formattedDate = task.created_at
-    ? new Date(task.created_at).toLocaleDateString('fr-FR', {
-        day: 'numeric',
-        month: 'short',
+    ? new Date(task.created_at).toLocaleDateString("fr-FR", {
+        day: "numeric",
+        month: "short",
       })
     : null;
 
@@ -67,7 +74,6 @@ export const TaskItem: FC<Props> = function ({ task, onLongPress, onChange, disa
     >
       <Animated.View style={animatedStyles}>
         <Animated.View style={{ opacity }}>
-
           <View style={styles.header}>
             <Checkbox
               size={10}
@@ -75,10 +81,7 @@ export const TaskItem: FC<Props> = function ({ task, onLongPress, onChange, disa
               disabled={disabled}
               onValueChange={handlePress}
             />
-            <TodoTitle
-              title={task.title}
-              completed={completed}
-            />
+            <TodoTitle title={task.title} completed={completed} />
           </View>
 
           {task.description && (
@@ -92,7 +95,6 @@ export const TaskItem: FC<Props> = function ({ task, onLongPress, onChange, disa
               <Text style={styles.date}>{formattedDate}</Text>
             </View>
           )}
-
         </Animated.View>
       </Animated.View>
     </Pressable>
@@ -101,8 +103,8 @@ export const TaskItem: FC<Props> = function ({ task, onLongPress, onChange, disa
 
 const styles = StyleSheet.create({
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   description: {
